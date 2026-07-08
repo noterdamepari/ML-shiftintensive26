@@ -8,7 +8,7 @@ import numpy as np
 ## -----
 def dataPreproc(df):
     # text NaN filling
-    cols = ["Бренд", "Модель", "Тип машины", "Локация", "Цвет", "Тип кузова"]
+    cols = ["Полное название", "Бренд", "Модель", "Тип машины", "Локация", "Цвет", "Тип кузова"]
     for col in cols:
         if col in df.columns:
             df[col] = df[col].fillna('unknown').astype(str)
@@ -105,15 +105,24 @@ if table is not None:
     dfx = dataPreproc(df)
     results = []
     for i in range(0,5):
-        dfy = np.round(np.expm1(models[i].predict(dfx)),4)
+        dfy = np.round(np.expm1(models[i].predict(dfx)),2)
         results.append(dfy)
 
     mean_res = np.mean(results)
-    y = pd.Series(dfy, name="Цена")
+    y = pd.Series(dfy, name="Предполагаемая Цена")
     final_result = df.join(y)
 
+    styled_res = final_result.style.set_properties(
+        subset=["Предполагаемая Цена"], 
+        **{
+            'background-color': '#e2f0d9',
+            'color': '#155724',
+            'font-weight': 'bold'
+        }
+    )
+
     st.subheader('Результат:')
-    st.table(final_result)
+    st.dataframe(styled_res)
 
     csv_res = final_result.to_csv(index=False)
 
@@ -151,5 +160,5 @@ if one_car_button:
     price = np.mean(prices)
 
     st.subheader('Результат:')
-    st.write(f'Предполагаемая цена: **{price:.2f}** у.е.')
+    st.success(f'Предполагаемая цена: **{price:.2f}** у.е.')
 # -----   
