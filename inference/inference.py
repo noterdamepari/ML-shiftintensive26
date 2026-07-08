@@ -1,4 +1,3 @@
-import csv
 import json
 from catboost import CatBoostRegressor
 import streamlit as st
@@ -104,14 +103,19 @@ with open("storage/sample.csv", "rb") as file:
 if table is not None:
     df = pd.read_csv(table)
     dfx = dataPreproc(df)
-    dfy = np.round(np.expm1(model.predict(dfx)),4)
+    results = []
+    for i in range(0,5):
+        dfy = np.round(np.expm1(models[i].predict(dfx)),4)
+        results.append(dfy)
+
+    mean_res = np.mean(results)
     y = pd.Series(dfy, name="Цена")
-    res = df.join(y)
+    final_result = df.join(y)
 
     st.subheader('Результат:')
-    st.table(res)
+    st.table(final_result)
 
-    csv_res = res.to_csv()
+    csv_res = final_result.to_csv(index=False)
 
     save_table_button = st.download_button(
         label="Сохранить таблицу",
